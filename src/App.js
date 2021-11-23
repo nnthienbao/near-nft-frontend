@@ -23,7 +23,7 @@ export default function App({accountId, contract, walletConnection, logout, logi
         logout={logout}
         login={login}
       />
-      <TabNft accountId={accountId} />
+      <TabNft accountId={accountId} contract={contract} />
     </>
   )
 }

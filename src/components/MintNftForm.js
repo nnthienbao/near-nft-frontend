@@ -3,9 +3,12 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import Big from 'big.js';
 import {uploadToStorage} from '../nftStorage'
 
-export default function MintNftForm({accountId}) {
+const BOATLOAD_OF_GAS = Big(3).times(10 ** 13).toFixed();
+
+export default function MintNftForm({accountId, contract}) {
   const [fileUpload, setFileUpload] = useState(null);
   const [title, setTitle] = useState("");
   const [des, setDes] = useState("");
@@ -46,6 +49,13 @@ export default function MintNftForm({accountId}) {
     console.log('Do mint nft');
     const nftId = `${accountId}_${new Date().getTime()}`;
     console.log(nftId, title, des, urlData);
+    contract.nft_mint(
+      { token_id: nftId, receiver_id: accountId, metadata: {title: title, description: des, media: urlData} },
+      BOATLOAD_OF_GAS,
+      Big(1).times(10 ** 24).toFixed()
+    ).then(() => {
+      console.log('NFT minted')
+    });
   }
 
   return (
