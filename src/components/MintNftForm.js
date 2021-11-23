@@ -3,32 +3,50 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import {uploadToStorage} from '../nftStorage'
 
-export default function MintNftForm() {
+export default function MintNftForm({accountId}) {
   const [fileUpload, setFileUpload] = useState(null);
-  const [fileName, setFileName] = useState("");
-  const [fileDes, setFileDes] = useState("");
+  const [title, setTitle] = useState("");
+  const [des, setDes] = useState("");
   const [errorFileUpload, setErrorFileUpload] = useState(false);
-  const [errorFileName, setErrorFileName] = useState(false);
-  const [errorFileDes, setErrorFileDes] = useState(false);
+  const [errorTitle, setErrorTitle] = useState(false);
+  const [errorDes, setErrorDes] = useState(false);
 
   const mint = () => {
+    let error = false;
     setErrorFileUpload(false);
-    setErrorFileName(false);
-    setErrorFileDes(false);
+    setErrorTitle(false);
+    setErrorDes(false);
     if (!fileUpload) {
+      error = true;
       setErrorFileUpload(true);
     }
-    if (!fileName) {
-      setErrorFileName(true);
+    if (!title || title === "") {
+      error = true;
+      setErrorTitle(true);
     }
-    if (!fileDes) {
-      setErrorFileDes(true);
+    if (!des || des === "") {
+      error = true;
+      setErrorDes(true);
     }
-    if (!errorFileUpload && !errorFileName && !errorFileDes) {
-      
+    if (!error) {
+      console.log('Do upload file')
+      uploadToStorage({fileUpload, title, des}).then(response => {
+        if (response.data && response.data.ok && response.data.value.cid) {
+          const cid = response.data.value.cid;
+          const urlData = `https://${cid}.ipfs.dweb.link`;
+          mintNft({urlData, title, des});
+        }
+      });
     }
   };
+
+  const mintNft = ({urlData, title, des}) => {
+    console.log('Do mint nft');
+    const nftId = `${accountId}_${new Date().getTime()}`;
+    console.log(nftId, title, des, urlData);
+  }
 
   return (
     <Box sx={{ mx: "auto", width: 400 }} style={{ padding: 20 }}>
@@ -48,33 +66,33 @@ export default function MintNftForm() {
       />
 
       <Typography style={{ marginTop: 10 }} variant="subtitle1" component="div">
-        Name
+        Title
       </Typography>
       <TextField
-        error={errorFileName}
-        helperText={errorFileName ? "Filename cannot be empty" : ""}
+        error={errorTitle}
+        helperText={errorTitle ? "Title cannot be empty" : ""}
         fullWidth
         required
-        name="name"
+        name="title"
         type="input"
-        placeholder="Enter NFT name..."
-        value={fileName}
-        onChange={(e) => setFileName(e.target.value)}
+        placeholder="Enter NFT title..."
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
       />
 
       <Typography style={{ marginTop: 10 }} variant="subtitle1" component="div">
         Description
       </Typography>
       <TextField
-        error={errorFileDes}
-        helperText={errorFileDes ? "File description cannot be empty" : ""}
+        error={errorDes}
+        helperText={errorDes ? "File description cannot be empty" : ""}
         fullWidth
         required
         name="description"
         type="input"
         placeholder="Enter NFT description..."
-        value={fileDes}
-        onChange={(e) => setFileDes(e.target.value)}
+        value={des}
+        onChange={(e) => setDes(e.target.value)}
       />
 
       <Button

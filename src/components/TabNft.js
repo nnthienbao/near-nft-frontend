@@ -4,7 +4,7 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import MintNftForm from './MintNftForm'
 
-export default function TabNft() {
+export default function TabNft({accountId}) {
 	const [value, setValue] = useState(0);
 
 	const handleChange = (e, newValue) => {
@@ -51,7 +51,7 @@ export default function TabNft() {
 			<Tab label="Your NFT" {...a11yProps(1)} />
 		</Tabs>
 		<TabPanel value={value} index={0}>
-			<MintNftForm />
+			<MintNftForm accountId={accountId} />
 		</TabPanel>
 		<TabPanel value={value} index={1}>
 			<h1>Your NFT</h1>
