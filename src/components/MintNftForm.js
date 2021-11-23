@@ -3,18 +3,23 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import Big from 'big.js';
-import {uploadToStorage} from '../nftStorage'
+import LoadingButton from "@mui/lab/LoadingButton";
+import SaveIcon from "@mui/icons-material/Save";
+import Big from "big.js";
+import { uploadToStorage } from "../nftStorage";
 
-const BOATLOAD_OF_GAS = Big(3).times(10 ** 13).toFixed();
+const BOATLOAD_OF_GAS = Big(3)
+  .times(10 ** 13)
+  .toFixed();
 
-export default function MintNftForm({accountId, contract}) {
+export default function MintNftForm({ accountId, contract }) {
   const [fileUpload, setFileUpload] = useState(null);
   const [title, setTitle] = useState("");
   const [des, setDes] = useState("");
   const [errorFileUpload, setErrorFileUpload] = useState(false);
   const [errorTitle, setErrorTitle] = useState(false);
   const [errorDes, setErrorDes] = useState(false);
+  const [isMinting, setIsMinting] = useState(false);
 
   const mint = () => {
     let error = false;
@@ -34,29 +39,39 @@ export default function MintNftForm({accountId, contract}) {
       setErrorDes(true);
     }
     if (!error) {
-      console.log('Do upload file')
-      uploadToStorage({fileUpload, title, des}).then(response => {
+      console.log("Do upload file");
+      setIsMinting(true);
+      uploadToStorage({ fileUpload, title, des }).then((response) => {
         if (response.data && response.data.ok && response.data.value.cid) {
           const cid = response.data.value.cid;
           const urlData = `https://${cid}.ipfs.dweb.link`;
-          mintNft({urlData, title, des});
+          mintNft({ urlData, title, des });
         }
       });
     }
   };
 
-  const mintNft = ({urlData, title, des}) => {
-    console.log('Do mint nft');
+  const mintNft = ({ urlData, title, des }) => {
+    console.log("Do mint nft");
     const nftId = `${accountId}_${new Date().getTime()}`;
     console.log(nftId, title, des, urlData);
-    contract.nft_mint(
-      { token_id: nftId, receiver_id: accountId, metadata: {title: title, description: des, media: urlData} },
-      BOATLOAD_OF_GAS,
-      Big(1).times(10 ** 24).toFixed()
-    ).then(() => {
-      console.log('NFT minted')
-    });
-  }
+    contract
+      .nft_mint(
+        {
+          token_id: nftId,
+          receiver_id: accountId,
+          metadata: { title: title, description: des, media: urlData },
+        },
+        BOATLOAD_OF_GAS,
+        Big(1)
+          .times(10 ** 24)
+          .toFixed()
+      )
+      .then(() => {
+        console.log("NFT minted");
+        setIsMinting(true);
+      });
+  };
 
   return (
     <Box sx={{ mx: "auto", width: 400 }} style={{ padding: 20 }}>
@@ -95,7 +110,7 @@ export default function MintNftForm({accountId, contract}) {
       </Typography>
       <TextField
         error={errorDes}
-        helperText={errorDes ? "File description cannot be empty" : ""}
+        helperText={errorDes ? "Description cannot be empty" : ""}
         fullWidth
         required
         name="description"
@@ -104,8 +119,8 @@ export default function MintNftForm({accountId, contract}) {
         value={des}
         onChange={(e) => setDes(e.target.value)}
       />
-
       <Button
+        disabled={isMinting}
         onClick={mint}
         style={{
           display: "block",
@@ -116,7 +131,10 @@ export default function MintNftForm({accountId, contract}) {
         variant="outlined"
         size="large"
       >
-        Mint
+        {!isMinting
+        ? 'Confirm'
+        : 'Minting'
+        }
       </Button>
     </Box>
   );
