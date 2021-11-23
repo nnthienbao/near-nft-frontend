@@ -3,6 +3,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import MintNftForm from "./MintNftForm";
+import NftCollection from "./NftCollection"
 
 export default function TabNft({ accountId, contract }) {
   const [value, setValue] = useState(0);
@@ -50,7 +51,7 @@ export default function TabNft({ accountId, contract }) {
         <MintNftForm accountId={accountId} contract={contract} />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        <h1>Your NFT</h1>
+        <NftCollection accountId={accountId} contract={contract} />
       </TabPanel>
     </>
   );
